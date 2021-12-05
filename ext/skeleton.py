@@ -47,6 +47,8 @@ def _go_up (event):
   # Event handler called when POX goes into up state
   # (we actually listen to the event in launch() below)
   log.info("Skeleton application ready (to do nothing).")
+  
+
 
 
 @poxutil.eval_args

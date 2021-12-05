@@ -24,6 +24,7 @@ import traceback
 import sys
 import os
 import socket
+sys.path.append(os.path.abspath("/Users/marlenaklein/Desktop/pox/"))
 import pox.lib.util
 import random
 from types import GeneratorType
@@ -56,6 +57,7 @@ class BaseTask  (object):
   id = None
   #running = False
   priority = 1
+  scheduled = False
 
   @classmethod
   def new (cls, *args, **kw):
@@ -160,7 +162,9 @@ class Scheduler (object):
   def __init__ (self, isDefaultScheduler = None, startInThread = True,
                 daemon = False, use_epoll=False, threaded_selecthub = True):
 
-    self._ready = deque()
+    self._ready = [deque()] * 10
+    self.limitIndex = 0
+    self.currentIndex = -1
     self._hasQuit = False
 
     self._selectHub = SelectHub(self, use_epoll=use_epoll,
@@ -233,7 +237,7 @@ class Scheduler (object):
     if threading.current_thread() is self._thread:
       # We're know we're good.
       #TODO: Refactor the following with ScheduleTask
-      if task in self._ready:
+      if task.scheduled:
         # It might make sense to keep a flag on the task, since checking
         # if it's in the ready list is not very efficient.
         # Not sure if it makes sense to print out a message here or not.
@@ -268,13 +272,16 @@ class Scheduler (object):
     is always safe.
     """
 
-    # Sanity check.  Won't catch all cases.
-    assert task not in self._ready
 
-    if first:
-      self._ready.appendleft(task)
-    else:
-      self._ready.append(task)
+    #Convert the priority level of the task to an integer, 0 to 9
+    p = int((1 - task.priority) * 9)
+    dq = self._ready[p]
+    #Make sure task isn't already there. Sanity check, won't catch all cases.
+    if task not in dq:
+      if first:
+        dq.appendleft(task)
+      else:
+        dq.append(task)
 
     self._selectHub.break_idle()
 
@@ -284,7 +291,11 @@ class Scheduler (object):
   def run (self):
     try:
       while self._hasQuit == False:
-        if len(self._ready) == 0:
+        empty = True
+        for dq in self._ready:
+          if len(dq) != 0:
+            empty = False
+        if empty:
           self._selectHub.idle()
           if self._hasQuit: break
         r = self.cycle()
@@ -297,16 +308,23 @@ class Scheduler (object):
   def cycle (self):
     #if len(self._ready) == 0: return False
 
-    # Patented hilarious priority system
-    #TODO: Replace it with something better
+    #Priority system: iterate through indices in the order 1, 1, 2, 1, 2, 3, etc. 
+    self.currentIndex += 1
+    print(self.currentIndex)
+    if(self.currentIndex > self.limitIndex):
+      self.currentIndex = 0
+      self.limitIndex += 1
+      #avoid going out of bounds
+      if(self.limitIndex > 9):
+        self.limitIndex = 0
+      
+    # 
     t = None
     try:
-      while True:
-        t = self._ready.popleft()
-        if t.priority >= 1: break
-        if len(self._ready) == 0: break
-        if t.priority >= self._random(): break
-        self._ready.append(t)
+      #if deque, move onto the next
+      if(len(self._ready[self.currentIndex]) == 0): 
+        return False
+      t = self._ready[self.currentIndex].popleft()
     except IndexError:
       return False
 
@@ -341,7 +359,7 @@ class Scheduler (object):
         # Sleep time
         if rv == 0:
           #print "sleep 0"
-          self._ready.append(t)
+          self._ready[self.currentIndex].append(t)
         else:
           self._selectHub.registerTimer(t, rv)
       elif rv == None:
@@ -977,7 +995,7 @@ class ScheduleTask (BaseTask):
 
   def run (self):
     #TODO: Refactor the following, since it is copy/pasted from schedule().
-    if self._task in self._scheduler._ready:
+    if self._task.scheduled:
       # It might make sense to keep a flag on the task, since checking
       # if it's in the ready list is not very efficient.
       # Not sure if it makes sense to print out a message here or not.
@@ -1153,7 +1171,7 @@ if __name__ == "__main__":
       while n <= b:
         print(n)
         n+=inc
-        yield Select([],[],[],sleep)
+        yield Sleep(0)
 
   s = Scheduler(daemon=True)
 
