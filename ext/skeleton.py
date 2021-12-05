@@ -38,6 +38,7 @@ from pox.lib.addresses import EthAddr, IPAddr # Address types
 import pox.lib.util as poxutil                # Various util functions
 import pox.lib.revent as revent               # Event library
 import pox.lib.recoco as recoco               # Multitasking library
+from pox.lib.recoco import TestTask, Sleep            # Classes for testing
 
 # Create a logger for this component
 log = core.getLogger()
@@ -47,7 +48,11 @@ def _go_up (event):
   # Event handler called when POX goes into up state
   # (we actually listen to the event in launch() below)
   log.info("Skeleton application ready (to do nothing).")
-  
+  t1 = TestTask(0, 2)
+  t2 = TestTask(200, 202)
+  t1.start(priority=.5)
+  t2.start()
+
 
 
 

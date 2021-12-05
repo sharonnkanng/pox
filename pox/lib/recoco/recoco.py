@@ -162,7 +162,9 @@ class Scheduler (object):
   def __init__ (self, isDefaultScheduler = None, startInThread = True,
                 daemon = False, use_epoll=False, threaded_selecthub = True):
 
-    self._ready = [deque()] * 10
+    self._ready = []
+    for i in range(10):
+      self._ready.append(deque())
     self.limitIndex = 0
     self.currentIndex = -1
     self._hasQuit = False
@@ -275,13 +277,15 @@ class Scheduler (object):
 
     #Convert the priority level of the task to an integer, 0 to 9
     p = int((1 - task.priority) * 9)
+    print("PRIORITY: ", p)
     dq = self._ready[p]
     #Make sure task isn't already there. Sanity check, won't catch all cases.
-    if task not in dq:
+    if not task.scheduled:
       if first:
         dq.appendleft(task)
       else:
         dq.append(task)
+      task.scheduled = True
 
     self._selectHub.break_idle()
 
@@ -310,16 +314,17 @@ class Scheduler (object):
 
     #Priority system: iterate through indices in the order 1, 1, 2, 1, 2, 3, etc. 
     self.currentIndex += 1
-    print(self.currentIndex)
     if(self.currentIndex > self.limitIndex):
       self.currentIndex = 0
       self.limitIndex += 1
       #avoid going out of bounds
-      if(self.limitIndex > 9):
+      if(self.limitIndex >= 9):
         self.limitIndex = 0
-      
-    # 
+    print(self.currentIndex)
+
     t = None
+    for x in self._ready:
+      print("DQ", x)
     try:
       #if deque, move onto the next
       if(len(self._ready[self.currentIndex]) == 0): 
@@ -329,7 +334,8 @@ class Scheduler (object):
       return False
 
     #print(len(self._ready), "tasks")
-
+    print(t)
+    t.scheduled = False
     while True:
       try:
         rv = t.execute()
@@ -360,6 +366,7 @@ class Scheduler (object):
         if rv == 0:
           #print "sleep 0"
           self._ready[self.currentIndex].append(t)
+          t.scheduled = True
         else:
           self._selectHub.registerTimer(t, rv)
       elif rv == None:
@@ -1160,6 +1167,19 @@ class BlockingTask (BaseTask):
       self.callback(rv,exc)
 
 
+
+
+class TestTask (BaseTask):
+    def __init__ (self, *args, **kw):
+      BaseTask.__init__(self, *args, **kw)
+
+    def run (self, a, b, inc = 1, sleep = 0):
+      n = a
+      while n <= b:
+        n+=inc
+        yield Sleep(1)
+        print("Task & Count:", self.id, self.priority, n)
+
 # Sanity tests
 if __name__ == "__main__":
   class TestTask (BaseTask):
@@ -1171,7 +1191,7 @@ if __name__ == "__main__":
       while n <= b:
         print(n)
         n+=inc
-        yield Sleep(0)
+        yield Sleep(1)
 
   s = Scheduler(daemon=True)
 
