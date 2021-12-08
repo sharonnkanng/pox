@@ -277,7 +277,6 @@ class Scheduler (object):
 
     #Convert the priority level of the task to an integer, 0 to 9
     p = int((1 - task.priority) * 9)
-    print("PRIORITY: ", p)
     dq = self._ready[p]
     #Make sure task isn't already there. Sanity check, won't catch all cases.
     if not task.scheduled:
@@ -320,11 +319,11 @@ class Scheduler (object):
       #avoid going out of bounds
       if(self.limitIndex >= 9):
         self.limitIndex = 0
-    print(self.currentIndex)
+    # print(self.currentIndex)
 
     t = None
-    for x in self._ready:
-      print("DQ", x)
+    # for x in self._ready:
+    #    print("DQ", x)
     try:
       #if deque, move onto the next
       if(len(self._ready[self.currentIndex]) == 0): 
@@ -1178,7 +1177,7 @@ class TestTask (BaseTask):
       while n <= b:
         n+=inc
         yield Sleep(1)
-        print("Task & Count:", self.id, self.priority, n)
+        print("Task & Priority & Count:", self.id, self.priority, n)
 
 # Sanity tests
 if __name__ == "__main__":

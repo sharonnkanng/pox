@@ -48,10 +48,27 @@ def _go_up (event):
   # Event handler called when POX goes into up state
   # (we actually listen to the event in launch() below)
   log.info("Skeleton application ready (to do nothing).")
-  t1 = TestTask(0, 2)
-  t2 = TestTask(200, 202)
-  t1.start(priority=.5)
-  t2.start()
+  t0 = TestTask(0, 3)
+  t1 = TestTask(100, 103)
+  # t2 = TestTask(200, 204)
+  # t3 = TestTask(300, 304)
+  # t4 = TestTask(400, 404)
+  # t5 = TestTask(500, 504)
+  # t6 = TestTask(600, 604)
+  # t7 = TestTask(700, 704)
+  # t8 = TestTask(800, 804)
+  # t9 = TestTask(900, 904)
+  t0.start()
+  t1.start()
+  # t2.start(priority=.7)
+  # t3.start(priority=.6)
+  # t4.start(priority=.5)
+  # t5.start(priority=.4)
+  # t6.start(priority=.3)
+  # t7.start(priority=.2)
+  # t8.start(priority=.1)
+  # t9.start(priority=.01)
+  
 
 
 
