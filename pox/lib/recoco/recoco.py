@@ -276,7 +276,7 @@ class Scheduler (object):
 
 
     #Convert the priority level of the task to an integer, 0 to 9
-    p = int((1 - task.priority) * 9)
+    p = round((1 - task.priority) * 9)
     dq = self._ready[p]
     #Make sure task isn't already there. Sanity check, won't catch all cases.
     if not task.scheduled:
@@ -317,9 +317,8 @@ class Scheduler (object):
       self.currentIndex = 0
       self.limitIndex += 1
       #avoid going out of bounds
-      if(self.limitIndex >= 9):
+      if(self.limitIndex > 9):
         self.limitIndex = 0
-    # print(self.currentIndex)
 
     t = None
     # for x in self._ready:
@@ -333,7 +332,6 @@ class Scheduler (object):
       return False
 
     #print(len(self._ready), "tasks")
-    print(t)
     t.scheduled = False
     while True:
       try:
@@ -1172,18 +1170,18 @@ class TestTask (BaseTask):
     def __init__ (self, *args, **kw):
       BaseTask.__init__(self, *args, **kw)
 
-    def run (self, a, b, st, inc = 1, sleep = 0):
+    def run (self, a, b, st, f, inc = 1, sleep = 0):
       n = a
       while n <= b:
         n+=inc
         yield Sleep(1)
         print("Task & Priority & Count:", self.id, self.priority, n)
-      timeToCompletion = datetime.datetime.now() - st
-      print(timeToCompletion)
-      f = open('performanceFile', 'a')
-      f.write("Task %s & Priority %s & Count %s: \n" % (self.id, self.priority, n))
-      f.write(str(timeToCompletion) + "\n")
-      f.close()
+      if(f):
+        timeToCompletion = datetime.datetime.now() - st
+        f = open('performanceFile', 'a')
+        f.write("Task %s & Priority %s & Count %s: \n" % (self.id, self.priority, n))
+        f.write(str(timeToCompletion) + "\n")
+        f.close()
 
 
 # Sanity tests

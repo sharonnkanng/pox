@@ -44,41 +44,40 @@ import datetime
 # Create a logger for this component
 log = core.getLogger()
 
-
 def _go_up (event):
   # Event handler called when POX goes into up state
   # (we actually listen to the event in launch() below)
   log.info("Skeleton application ready (to do nothing).")
-  test1()
-  test2()
-  # dt = datetime.datetime.now()
-  # log.info(dt)
-  # t0 = TestTask(0, 3, dt)
-  # t1 = TestTask(100, 103, dt)
-  # t2 = TestTask(200, 204)
-  # t3 = TestTask(300, 304)
-  # t4 = TestTask(400, 404)
-  # t5 = TestTask(500, 504)
-  # t6 = TestTask(600, 604)
-  # t7 = TestTask(700, 704)
-  # t8 = TestTask(800, 804)
-  # t9 = TestTask(900, 904)
-  # t0.start()
-  # t1.start()
-  # t2.start(priority=.7)
-  # t3.start(priority=.6)
-  # t4.start(priority=.5)
-  # t5.start(priority=.4)
-  # t6.start(priority=.3)
-  # t7.start(priority=.2)
-  # t8.start(priority=.1)
-  # t9.start(priority=.01)
+  dt = datetime.datetime.now()
+  log.info(dt)
+  t0 = TestTask(0, 3, dt, False)
+  t1 = TestTask(100, 103, dt, False)
+  t2 = TestTask(200, 204, dt, False)
+  t3 = TestTask(300, 304, dt, False)
+  t4 = TestTask(400, 404, dt, False)
+  t5 = TestTask(500, 504, dt, False)
+  t6 = TestTask(600, 604, dt, False)
+  t7 = TestTask(700, 704, dt, False)
+  t8 = TestTask(800, 804, dt, False)
+  t9 = TestTask(900, 904, dt, True)
+  t0.start(priority=.9)
+  t1.start(priority=.8)
+  t2.start(priority=.7)
+  t3.start(priority=.6)
+  t4.start(priority=.5)
+  t5.start(priority=.4)
+  t6.start(priority=.3)
+  t7.start(priority=.2)
+  t8.start(priority=.1)
+  t9.start(priority=0)
+  # test1()
+  # test2()
 
 def test1 ():
   dt = datetime.datetime.now()
   log.info(dt)
-  t0 = TestTask(0, 3, dt)
-  t1 = TestTask(100, 103, dt)
+  t0 = TestTask(0, 3, dt, False)
+  t1 = TestTask(100, 103, dt, True)
   t0.start()
   t1.start()
 
@@ -86,11 +85,12 @@ def test1 ():
 def test2 ():
   dt = datetime.datetime.now()
   log.info(dt)
-  t0 = TestTask(0, 3, dt)
+  t0 = TestTask(0, 3, dt, True)
   t0.start()
   
-  
-
+# def _go_up2 (event):
+#   test1()
+#   test2()
 
 
 
