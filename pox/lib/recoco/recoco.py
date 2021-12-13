@@ -1170,19 +1170,25 @@ class TestTask (BaseTask):
     def __init__ (self, *args, **kw):
       BaseTask.__init__(self, *args, **kw)
 
-    def run (self, a, b, st, f, inc = 1, sleep = 0):
+    def run (self, a, b, st, final, inc = 1, sleep = 0):
       n = a
+      responseTime = (datetime.datetime.now() - st).total_seconds()
+      f = open('responsetimeList', 'a')
+      f.write(str(responseTime) + "\n")
+      f.close()
       while n <= b:
         n+=inc
         yield Sleep(1)
-        print("Task & Priority & Count:", self.id, self.priority, n)
-      if(f):
-        timeToCompletion = datetime.datetime.now() - st
-        f = open('performanceFile', 'a')
-        f.write("Task %s & Priority %s & Count %s: \n" % (self.id, self.priority, n))
+      turnaroundTime = (datetime.datetime.now() - st).total_seconds()
+      f = open('turnaroundtimeList', 'a')
+      f.write(str(turnaroundTime) + "\n")
+      f.close()
+      if(final):
+        timeToCompletion = (datetime.datetime.now() - st).total_seconds() 
+        f = open('performanceFileList', 'a')
         f.write(str(timeToCompletion) + "\n")
         f.close()
-
+        print('done')
 
 # Sanity tests
 if __name__ == "__main__":
