@@ -24,7 +24,7 @@ class FieldStorage (dict):
     content_header = headers.get('content-type')
 
     # Create a BytesFeedParser object for EmailMessage instance
-    #(applicable only for versions above 3.6)
+    # (applicable only for versions above 3.6)
     p = email.parser.BytesFeedParser(policy=policy.default)
     p.feed(
       (f'content-type: {content_header}\n')
