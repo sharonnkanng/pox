@@ -309,28 +309,43 @@ class Scheduler (object):
       self._allDone = True
 
   def cycle (self):
-    #if len(self._ready) == 0: return False
 
-    #Priority system: iterate through indices in the order 1, 1, 2, 1, 2, 3, etc. 
-    self.currentIndex += 1
-    if(self.currentIndex > self.limitIndex):
-      self.currentIndex = 0
-      self.limitIndex += 1
-      #avoid going out of bounds
-      if(self.limitIndex > 9):
-        self.limitIndex = 0
+    max_tasks_per_priority = 20
+    while True:
+      self.currentIndex += 1
+      if(self.currentIndex > self.limitIndex):
+        self.currentIndex = 0
+        self.limitIndex += 1
+        #avoid going out of bounds
+        if(self.limitIndex > 9):
+          self.limitIndex = 0
 
-    t = None
-    # for x in self._ready:
-    #    print("DQ", x)
-    try:
-      #if deque, move onto the next
-      if(len(self._ready[self.currentIndex]) == 0): 
+      dq = self._ready[self.currentIndex]
+      if dq:
+        tasks_processed = 0
+        while tasks_processed < max_tasks_per_priority and dq :
+          t = dq.popleft()
+          t.scheduled = False
+
+          if not self._execute(t):
+            #print("Reschedule", t)
+            return False
+          tasks_processed += 1
+          higher = self.higher(self.currentIndex)
+          if higher:
+            self.currentIndex = higher
+            break
+      else:
         return False
-      t = self._ready[self.currentIndex].popleft()
-    except IndexError:
       return False
 
+  def higher(self, index):
+    for i in range(index+1, 10):
+      if len(self._ready[i]) > 0:
+        return i
+    return 0
+
+  def _execute (self, t):
     #print(len(self._ready), "tasks")
     t.scheduled = False
     while True:
@@ -1170,22 +1185,22 @@ class TestTask (BaseTask):
     def __init__ (self, *args, **kw):
       BaseTask.__init__(self, *args, **kw)
 
-    def run (self, a, b, st, final, inc = 1, sleep = 0):
+    def run (self, a, b, st, final, num, inc = 1, sleep = 0):
       n = a
       responseTime = (datetime.datetime.now() - st).total_seconds()
-      f = open('responsetimeList', 'a')
+      f = open(f"new4_responsetimeList30 {num}", 'a')
       f.write(str(responseTime) + "\n")
       f.close()
       while n <= b:
         n+=inc
         yield Sleep(1)
       turnaroundTime = (datetime.datetime.now() - st).total_seconds()
-      f = open('turnaroundtimeList', 'a')
+      f = open(f"new4_turnaroundtimeList30 {num}", 'a')
       f.write(str(turnaroundTime) + "\n")
       f.close()
       if(final):
         timeToCompletion = (datetime.datetime.now() - st).total_seconds() 
-        f = open('performanceFileList', 'a')
+        f = open(f"new4_performanceFileList30 {num}", 'a')
         f.write(str(timeToCompletion) + "\n")
         f.close()
         print('done')
